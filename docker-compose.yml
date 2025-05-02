@@ -1,0 +1,109 @@
+services:
+  webserver:
+    image: nginx:alpine
+    container_name: lemp-webserver
+    working_dir: /var/www
+    volumes:
+      - ./var/www:/var/www
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/certs:/etc/nginx/certs
+    ports:
+      - "80:80"
+      - "443:443"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+    depends_on:
+      - php-fpm
+
+  php-fpm:
+    build:
+      context: php
+      args:
+        - USERGID=${USERGID}
+        - USERUID=${USERUID}
+        - USERNAME=${USERNAME}
+        - NODE_MAJOR=20
+    container_name: lemp-php
+    working_dir: /var/www
+    volumes:
+      - ./var/log/php/:/var/log/php/
+      - ./var/www:/var/www
+      - ./php/config/php.ini:/usr/local/etc/php/php.ini
+      - ./ssh-keys:/var/www/.ssh/
+    env_file:
+      - .env
+    environment:
+      - TERM=xterm
+      - PHP_IDE_CONFIG=serverName=PHP
+      - COMPOSER_MEMORY_LIMIT=-1
+      - COMPOSER_PROCESS_TIMEOUT=600
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+
+  mysql:
+    image: mysql:latest
+    container_name: lemp-mysql
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./var/lib/mysql:/var/lib/mysql
+    environment:
+      - MYSQL_USERNAME=root
+      - MYSQL_ROOT_PASSWORD=root
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: lemp-phpmyadmin
+    links:
+      - mysql:db
+    ports:
+      - 8000:80
+    environment:
+      - PMA_ARBITRARY=1
+      - UPLOAD_LIMIT=1204M
+      - MEMORY_LIMIT=4096M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+
+  node:
+    build:
+      context: node
+      args:
+        - USERNAME=${USERNAME}
+    container_name: lemp-node
+    user: "node"
+    volumes:
+      - ./var/node/app:/usr/src/app
+    env_file:
+      - .env
+    environment:
+      - NODE_OPTIONS=--openssl-legacy-provider
+    working_dir: /usr/src/app
+    command: "nodemon --exec 'node --inspect=0.0.0.0:9229 index.js'"
+    ports:
+      - "3000:3000"
+      - "9229:9229"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: lemp-mailhog
+    ports:
+      - "8025:8025"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
