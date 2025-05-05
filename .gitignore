@@ -52,8 +52,5 @@ auth.json
 /.cache
 
 
-# Ignora tudo dentro de var/
-var/*
-
-# Mas permite var/lib/ e seus conteúdos
-!var/www
+# Ignorar tudo dentro de var/lib/mysql/
+var/lib/mysql/
