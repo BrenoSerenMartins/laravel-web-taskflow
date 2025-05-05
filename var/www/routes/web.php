@@ -8,20 +8,16 @@
  * @version 1.0
  */
 
+use App\Http\Controllers\StatusController;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BoardController;
 use App\Http\Controllers\HomeController;
-use Illuminate\Support\Facades\Route;
 
-Route::get('/laravel', function () {
-    return view('welcome');
-});
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
-Route::get('/', [HomeController::class, 'index']);
-Route::get('/boards', [BoardController::class, 'index'])->name('boards.index');
-Route::post('/board', [BoardController::class, 'store'])->name('board.store');
-Route::post('/board/edit', [BoardController::class, 'edit'])->name('board.edit');
-Route::delete('/board/delete/{board}', [BoardController::class, 'destroy'])->name('board.destroy');
-Route::put('/board/update/{board}', [BoardController::class, 'update'])->name('board.update');
+Route::resource('boards', BoardController::class);
+Route::resource('boards.statuses', StatusController::class);
+
 
 
 

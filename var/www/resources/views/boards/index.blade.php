@@ -5,21 +5,36 @@
 @section('content')
     <div class="flex items-center justify-between mb-6">
         <h1 class="text-2xl font-bold">Boards</h1>
-        <form action="{{route('board.store')}}" method="POST" class="flex items-center space-x-2">
-            @csrf
-            <input type="text" name="name" placeholder="Nome da nova board"
-                   class="border border-gray-300 rounded px-3 py-1 focus:outline-none focus:ring focus:border-blue-300"
-                   required>
-            <button type="submit"
-                    class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition">
-                Criar
+        <div x-data="{ showForm: false }" class="relative">
+            <button @click="showForm = !showForm"
+                    class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
             </button>
-        </form>
+
+            <!-- Add Form -->
+            <form x-show="showForm" @click.away="showForm = false" method="POST" action="{{ route('boards.store') }}"
+                  class="absolute right-0 mt-2 bg-white shadow-lg rounded p-4 space-y-2 w-64 z-50">
+                @csrf
+                <input type="text" name="name" placeholder="Board name"
+                       class="w-full border border-gray-300 rounded px-3 py-1 focus:outline-none focus:ring focus:border-blue-300"
+                       required>
+                <input type="text" name="color" placeholder="#ffffff"
+                       class="w-full border border-gray-300 rounded px-3 py-1 focus:outline-none focus:ring focus:border-blue-300">
+                <button type="submit"
+                        class="bg-blue-600 text-white w-full py-1 rounded hover:bg-blue-700 transition">
+                    Add
+                </button>
+            </form>
+        </div>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         @foreach ($boards as $board)
-            <div class="bg-white shadow rounded p-4 border border-gray-200 relative">
+            <div class="bg-white shadow rounded p-4 border border-gray-200 relative"
+                 style="background-color: {{$board->color}}">
                 <div class="absolute top-2 right-2 flex space-x-2">
                     <x-modal title="Edit Board" :open="false">
                         <x-slot:trigger>
@@ -31,19 +46,21 @@
                         </x-slot:trigger>
 
                         <!-- Modal content -->
-                        <form method="POST" action="{{ route('board.update', $board) }}">
+                        <form method="POST" action="{{ route('boards.update', $board) }}">
                             @csrf
                             @method('PUT')
 
                             <label class="block text-sm mb-2">Board Name</label>
                             <input type="text" name="name" value="{{ $board->name }}" class="w-full border rounded p-2"
                                    required>
+                            <input type="text" name="color" value="{{ $board->color }}"
+                                   class="w-full border rounded p-2">
 
                             <button type="submit" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded">Save</button>
                         </form>
                     </x-modal>
 
-                    <form method="POST" action="{{ route('board.destroy', $board) }}">
+                    <form method="POST" action="{{ route('boards.destroy', $board) }}">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="text-gray-500 hover:text-red-600" title="Delete">
@@ -59,12 +76,11 @@
                 <h2 class="text-lg font-semibold">{{ $board->name }}</h2>
                 <p class="text-sm text-gray-500 mt-1">ID: {{ $board->id }}</p>
 
-                <a href="#" class="text-blue-600 text-sm mt-3 inline-block hover:underline">
+                <a href="{{route("boards.show", $board)}}"
+                   class="text-blue-600 text-sm mt-3 inline-block hover:underline">
                     View Board
                 </a>
             </div>
         @endforeach
-
-
     </div>
 @endsection

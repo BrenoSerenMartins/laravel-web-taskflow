@@ -13,6 +13,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Board extends Model
 {
@@ -20,6 +21,7 @@ class Board extends Model
 
     protected $fillable = [
         'name',
+        'color',
         'user_id'
     ];
 
@@ -28,9 +30,8 @@ class Board extends Model
 //        return $this->belongsTo(User::class);
 //    }
 
-    // Relacionamento com as colunas (1:N)
-//    public function columns()
-//    {
-//        return $this->hasMany(Column::class);  // Uma Board tem muitas colunas
-//    }
+    public function statuses(): HasMany
+    {
+        return $this->hasMany(Status::class);
+    }
 }

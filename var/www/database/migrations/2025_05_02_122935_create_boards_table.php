@@ -22,6 +22,8 @@ return new class extends Migration
         Schema::create('boards', function (Blueprint $table) {
             $table->id();
             $table->string('name');  // Nome da board, ex: "Projeto X"
+            $table->string('description')->nullable();
+            $table->string('color')->default('#fff');
 //            $table->foreignId('user_id')->constrained()->onDelete('cascade');  // Referência ao dono (User)
             $table->timestamps();  // Criado e atualizado
         });
