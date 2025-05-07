@@ -21,11 +21,12 @@ return new class extends Migration
     {
         Schema::create('boards', function (Blueprint $table) {
             $table->id();
-            $table->string('name');  // Nome da board, ex: "Projeto X"
+//            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->string('name');
             $table->string('description')->nullable();
+            $table->unsignedInteger('position')->default(0);
             $table->string('color')->default('#fff');
-//            $table->foreignId('user_id')->constrained()->onDelete('cascade');  // Referência ao dono (User)
-            $table->timestamps();  // Criado e atualizado
+            $table->timestamps();
         });
     }
 

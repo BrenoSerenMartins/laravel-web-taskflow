@@ -11,6 +11,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Board;
+use App\Models\Status;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
@@ -22,21 +23,20 @@ class BoardController extends Controller
 
     public function index(): View|Application|Factory
     {
-        $boards = Board::with('statuses')->get();
+        $boards = Board::with(['statuses', 'tasks'])->get();
         return view('boards.index', compact('boards'));
     }
 
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
+        $validatedFields = $request->validate([
             'name' => 'required|string|max:255',
             'color' => 'nullable|string|min:3',
         ]);
-        $boardData['name'] = $request->input('name');
-        if ($request->input('color')) {
-            $boardData['color'] = $request->input('color');
-        }
-        $board = Board::create($boardData);
+        removeEmptyOptionalFields(Board::OPTIONAL_FIELDS, $validatedFields);
+
+        $board = Board::create($validatedFields);
+
         return redirect()->route('boards.index')->with('success', 'Board: ' . $board->name . ' created successfully!');
     }
 
@@ -47,16 +47,13 @@ class BoardController extends Controller
 
     public function update(Request $request, Board $board): RedirectResponse
     {
-        $request->validate([
+        $validatedFields = $request->validate([
             'name' => 'required|string|max:255',
             'color' => 'nullable|string|min:3',
         ]);
-        $boardData['name'] = $request->input('name');
-        if ($request->input('color')) {
-            $boardData['color'] = $request->input('color');
-        }
-        $board->update($boardData);
-        $board->save();
+        removeEmptyOptionalFields(Board::OPTIONAL_FIELDS, $validatedFields);
+
+        $board->update($validatedFields);
 
         return redirect()->route('boards.index')->with('success', 'Board: ' . $board->name . ' updated successfully!');
     }

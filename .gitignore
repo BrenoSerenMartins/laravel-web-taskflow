@@ -50,6 +50,10 @@ auth.json
 
 # Ignorar arquivos de cache
 /.cache
+var/www/.cache/
+var/www/.config/
+var/www/.local/
+
 
 
 # Ignorar tudo dentro de var/lib/mysql/

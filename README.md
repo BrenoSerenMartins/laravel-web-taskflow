@@ -18,7 +18,7 @@
 - [ ] User registration and login (coming soon)
 - [x] Boards CRUD
 - [x] Status/Columns CRUD
-- [ ] Tasks CRUD (coming soon)
+- [x] Tasks CRUD
 - [ ] Filters by date and priority (coming soon)
 - [ ] Notification system (coming soon)
 

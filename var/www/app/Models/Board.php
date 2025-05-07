@@ -19,6 +19,10 @@ class Board extends Model
 {
     use HasFactory;
 
+    const OPTIONAL_FIELDS = [
+        'color',
+    ];
+
     protected $fillable = [
         'name',
         'color',
@@ -33,5 +37,10 @@ class Board extends Model
     public function statuses(): HasMany
     {
         return $this->hasMany(Status::class);
+    }
+
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
     }
 }

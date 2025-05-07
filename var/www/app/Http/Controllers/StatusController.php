@@ -13,32 +13,19 @@ class StatusController extends Controller
 
     public function index(): Collection
     {
-        return Status::all();
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        return Status::with(['board', 'tasks'])->get();
     }
 
     public function store(Board $board, Request $request): RedirectResponse
     {
-        $request->validate([
+        $validatedFields = $request->validate([
             'name' => 'required|string|max:255',
             'color' => 'nullable|string|max:25',
             'order' => 'nullable|integer',
         ]);
-        $statusData['name'] = $request->input('name');
-        if($request->input('color')) {
-            $statusData['color'] = $request->input('color');
-        }
-        if($request->input('order')) {
-            $statusData['order'] = $request->input('order');
-        }
-        $board->statuses()->create($statusData);
+        removeEmptyOptionalFields(Status::OPTIONAL_FIELDS, $validatedFields);
+        $board->statuses()->create($validatedFields);
+
         return redirect()->route('boards.show', $board)
             ->with('success', 'Status: ' . $request->input('name') . ' successfully!');
     }
@@ -61,19 +48,13 @@ class StatusController extends Controller
 
     public function update(Request $request, Board $board, Status $status): RedirectResponse
     {
-        $request->validate([
+        $validatedFields = $request->validate([
             'name' => 'required|string|max:255',
-            'color' => 'nullable|string|max:25',
-            'order' => 'nullable|integer'
+            'position' => 'nullable|integer'
         ]);
-        $statusData['name'] = $request->input('name');
-        if($request->input('color')) {
-            $statusData['color'] = $request->input('color');
-        }
-        if($request->input('order')) {
-            $statusData['order'] = $request->input('order');
-        }
-        $status->update($statusData);
+        removeEmptyOptionalFields(Status::OPTIONAL_FIELDS, $validatedFields);
+        $status->update($validatedFields);
+
         return redirect()->route('boards.show', $board)
             ->with('success', 'Updated Status: ' . $request->input('name') . ' successfully!');
     }
