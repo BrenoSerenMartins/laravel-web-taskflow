@@ -20,8 +20,8 @@
 - [x] Status/Columns CRUD
 - [x] Status/Columns Drag/Drop
 - [x] Tasks CRUD
-- [ ] Tasks Drag/Drop
-- [ ] Filters by date and priority (coming soon)
+- [x] Tasks Drag/Drop
+- [ ] Search Task (coming soon)
 - [ ] Notification system (coming soon)
 
 ---
