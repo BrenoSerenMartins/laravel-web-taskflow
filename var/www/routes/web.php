@@ -17,7 +17,11 @@ use App\Http\Controllers\HomeController;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::resource('boards', BoardController::class);
+Route::put('/boards/{board}/statuses/reorder', [StatusController::class, 'reorder'])->name('boards.statuses.reorder');
+Route::put('/boards/{board}/tasks/reorder', [TaskController::class, 'reorder'])->name('boards.tasks.reorder');
+
 Route::resource('boards.statuses', StatusController::class);
+
 Route::resource('boards.tasks', TaskController::class);
 
 

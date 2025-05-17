@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Board;
 use App\Models\Status;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -52,12 +53,28 @@ class StatusController extends Controller
             'name' => 'required|string|max:255',
             'position' => 'nullable|integer'
         ]);
-        removeEmptyOptionalFields(Status::OPTIONAL_FIELDS, $validatedFields);
+        removeEmptyOptionalFields(Status::OPTIONAL_UPDATE_FIELDS, $validatedFields);
         $status->update($validatedFields);
 
         return redirect()->route('boards.show', $board)
             ->with('success', 'Updated Status: ' . $request->input('name') . ' successfully!');
     }
+
+    public function reorder(Request $request, Board $board): JsonResponse
+    {
+        $statusesPosition = $request->input('statusesPosition');
+
+        foreach ($statusesPosition as $index => $statusId) {
+            $status = $board->statuses()->where('id', $statusId)->first();
+
+            if ($status) {
+                $status->update(['position' => $index]);
+            }
+        }
+
+        return response()->json(['success' => true]);
+    }
+
 
     public function destroy(Board $board, Status $status): RedirectResponse
     {

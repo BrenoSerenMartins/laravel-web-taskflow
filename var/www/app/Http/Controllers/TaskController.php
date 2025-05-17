@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Board;
 use App\Models\Task;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -65,6 +66,24 @@ class TaskController extends Controller
         return redirect()->route('boards.show', $board)->with('success', 'Tarefa ' . $task->title . ' atualizada!');
 
     }
+
+    public function reorder(Request $request, Board $board): JsonResponse
+    {
+        $taskIds = $request->input('tasksPosition');
+        $statusId = $request->input('status_id');
+
+        foreach ($taskIds as $index => $taskId) {
+            Task::where('id', $taskId)
+                ->where('board_id', $board->id)
+                ->update([
+                    'position' => $index,
+                    'status_id' => $statusId
+                ]);
+        }
+
+        return response()->json(['message' => 'Tarefas reordenadas com sucesso.']);
+    }
+
 
     /**
      * Remove the specified resource from storage.

@@ -6,21 +6,54 @@
     <div
         x-data
         x-init="
+        // Sortable das colunas (se você já tiver, mantenha)
         Sortable.create($refs.columnsContainer, {
             animation: 150,
-            handle: '.drag-handle',
+            handle: '.drag-handle', // se tiver
             onEnd: async (evt) => {
-                const order = Array.from($refs.columnsContainer.children).map(el => el.dataset.id);
-                await fetch('{{ route('boards.statuses.update', [$board, $board]) }}', {
-                    method: 'POST',
+                const statusesPosition = Array.from(evt.to.children).map(col => col.dataset.id);
+
+                await fetch('{{ route('boards.statuses.reorder', ['board' => $board->id]) }}', {
+                    method: 'PUT',
                     headers: {
+                        'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json'
+                        'Accept': 'application/json',
                     },
-                    body: JSON.stringify({ order })
+                    body: JSON.stringify({ statusesPosition })
                 });
             }
-        })
+        });
+
+        // Sortable das tarefas (em cada coluna)
+        Array.from($refs.columnsContainer.children).forEach(column => {
+            const columnId = column.dataset.id;
+            const taskContainer = column.querySelector('[x-ref^=\'tasksContainer\']');
+
+            Sortable.create(taskContainer, {
+                group: 'shared-tasks',
+                animation: 150,
+                onEnd: async (evt) => {
+                    const taskElements = Array.from(evt.to.children);
+                    const tasksPosition = taskElements.map(el => el.dataset.id);
+                    const newStatusId = evt.to.closest('[data-id]')?.dataset.id;
+
+                    await fetch('{{ route('boards.tasks.reorder', ['board' => $board->id]) }}', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            tasksPosition,
+                            status_id: newStatusId,
+                        })
+                    });
+                }
+            });
+        });
+
     "
     >
 
@@ -131,9 +164,9 @@
                         </form>
 
                         <!-- Tasks -->
-                        <div class="space-y-2">
-                            @foreach($status->tasks as $task)
-                                <div x-data="{ open: false, editing: false }" class="relative">
+                        <div class="space-y-2" x-ref="tasksContainer-{{ $status->id }}">
+                            @foreach($status->tasks->sortBy('position') as $task)
+                                <div x-data="{ open: false, editing: false }" class="relative" data-id="{{ $task->id }}">
                                     <!-- Trigger -->
                                     <div @click="open = true"
                                          class="cursor-pointer bg-gray-100 rounded p-3 shadow-sm hover:bg-gray-200 transition">
@@ -196,7 +229,8 @@
                                                                 </button>
                                                                 <!-- Form de exclusão ativado remotamente pelo botão -->
                                                                 <form x-ref="deleteForm" method="POST"
-                                                                      action="{{ route('boards.tasks.destroy', [$board, $task]) }}" class="hidden">
+                                                                      action="{{ route('boards.tasks.destroy', [$board, $task]) }}"
+                                                                      class="hidden">
                                                                     @csrf
                                                                     @method('DELETE')
                                                                 </form>

@@ -10,7 +10,7 @@
 - **Laravel** (Backend - API)
 - **HTML5** (Frontend)
 - **CSS3** (Styling)
-- **Vanilla JavaScript** (Interactions)
+- **JavaScript** (Interactions)
 - **MySQL** (Database)
 
 ## ✅ Features (MVP)
@@ -18,7 +18,9 @@
 - [ ] User registration and login (coming soon)
 - [x] Boards CRUD
 - [x] Status/Columns CRUD
+- [x] Status/Columns Drag/Drop
 - [x] Tasks CRUD
+- [ ] Tasks Drag/Drop
 - [ ] Filters by date and priority (coming soon)
 - [ ] Notification system (coming soon)
 

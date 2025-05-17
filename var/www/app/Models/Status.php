@@ -12,6 +12,11 @@ class Status extends Model
         'color',
         'position',
     ];
+    const OPTIONAL_UPDATE_FIELDS = [
+        'name',
+        'color',
+        'position',
+    ];
 
     protected $fillable = [
         'name',
