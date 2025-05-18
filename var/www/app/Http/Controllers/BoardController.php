@@ -1,43 +1,34 @@
 <?php
-/**
- * TaskFlow - Task Management System
- *
- * @package TaskFlow
- * @author Breno Seren Martins <brenosm.dev@gmail.com>
- * @license Apache 2.0 (https://www.apache.org/licenses/LICENSE-2.0)
- * @version 1.0
- */
+declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Boards\StoreBoardRequest;
+use App\Http\Requests\Boards\UpdateBoardRequest;
 use App\Models\Board;
-use App\Models\Status;
+use App\Services\BoardService;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 
 class BoardController extends Controller
 {
 
+    public function __construct(protected BoardService $boardService) {}
     public function index(): View|Application|Factory
     {
         $boards = Board::with(['statuses', 'tasks'])->get();
+
         return view('boards.index', compact('boards'));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreBoardRequest $request): RedirectResponse
     {
-        $validatedFields = $request->validate([
-            'name' => 'required|string|max:255',
-            'color' => 'nullable|string|min:3',
-        ]);
-        removeEmptyOptionalFields(Board::OPTIONAL_FIELDS, $validatedFields);
+        $board = $this->boardService->create($request->validated());
 
-        $board = Board::create($validatedFields);
-
-        return redirect()->route('boards.index')->with('success', 'Board: ' . $board->name . ' created successfully!');
+        return to_route('boards.index')
+            ->with('success', "Board: {$board->name} created successfully!");
     }
 
     public function show(Board $board): View|Application|Factory
@@ -45,22 +36,19 @@ class BoardController extends Controller
         return view('boards.show', compact('board'));
     }
 
-    public function update(Request $request, Board $board): RedirectResponse
+    public function update(UpdateBoardRequest $request, Board $board): RedirectResponse
     {
-        $validatedFields = $request->validate([
-            'name' => 'required|string|max:255',
-            'color' => 'nullable|string|min:3',
-        ]);
-        removeEmptyOptionalFields(Board::OPTIONAL_FIELDS, $validatedFields);
+        $this->boardService->update($board, $request->validated());
 
-        $board->update($validatedFields);
-
-        return redirect()->route('boards.index')->with('success', 'Board: ' . $board->name . ' updated successfully!');
+        return to_route('boards.index')
+            ->with('success', "Board: {$board->name} updated successfully!");
     }
 
     public function destroy(Board $board): RedirectResponse
     {
         $board->delete();
-        return redirect()->route('boards.index')->with('success', 'Board: ' . $board->name . ' was deleted successfully!');
+
+        return to_route('boards.index')
+            ->with('success', "Board: {$board->name} was deleted successfully!");
     }
 }
