@@ -2,8 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Tasks\ReorderTaskRequest;
+use App\Http\Requests\Tasks\StoreTaskRequest;
+use App\Http\Requests\Tasks\UpdateTaskRequest;
 use App\Models\Board;
+use Illuminate\Support\Facades\DB;
+use App\Models\Status;
 use App\Models\Task;
+use App\Services\TaskService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -11,27 +17,44 @@ use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
+    public function __construct(protected TaskService $taskService)
+    {
+    }
+
     public function index(): Collection
     {
         return Task::with(['board'])->get();
     }
 
-    public function store(Request $request, Board $board): RedirectResponse
+    public function store(StoreTaskRequest $request, Board $board): RedirectResponse
     {
-        $validatedFields = $request->validate([
-            'status_id' => 'required|integer',
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'color' => 'nullable|string',
-            'position' => 'nullable|integer',
-            'assigned_to' => 'nullable|integer',
-        ]);
-        $validatedFields['created_by'] = auth()->id();
-        removeEmptyOptionalFields(Task::OPTIONAL_FIELDS, $validatedFields);
+        $task = $this->taskService->create($request->validated(), $board);
 
-        $task = $board->tasks()->create($validatedFields);
-        return redirect()->route('boards.show', $board)->with('success', 'Tarefa ' . $task->title . ' criada!');
+        return to_route('boards.show', $board)
+            ->with('success', "Tarefa {$task->title} criada!");
+    }
 
+    public function update(UpdateTaskRequest $request, Board $board, Task $task): RedirectResponse
+    {
+        $this->taskService->update($task, $request->validated());
+
+        return to_route('boards.show', $board)
+            ->with('success', "Tarefa {$task->title} atualizada!");
+    }
+
+    public function reorder(ReorderTaskRequest $request, Board $board): JsonResponse
+    {
+        $this->taskService->reorderTasks($request->validated(), $board);
+
+        return response()->json(['message' => 'Tarefas reordenadas com sucesso.']);
+    }
+
+    public function destroy(Board $board, Task $task): RedirectResponse
+    {
+        $task->delete();
+
+        return to_route('boards.show', $board)
+            ->with('success', "Deleted Task: {$task->title} successfully!");
     }
 
     /**
@@ -48,50 +71,5 @@ class TaskController extends Controller
     public function edit(Task $task)
     {
         //
-    }
-
-
-    public function update(Request $request, Board $board, Task $task): RedirectResponse
-    {
-        $validatedFields = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'color' => 'nullable|string',
-            'position' => 'nullable|integer',
-            'assigned_to' => 'nullable|integer',
-        ]);
-        removeEmptyOptionalFields(Task::OPTIONAL_FIELDS, $validatedFields);
-        $task->update($validatedFields);
-
-        return redirect()->route('boards.show', $board)->with('success', 'Tarefa ' . $task->title . ' atualizada!');
-
-    }
-
-    public function reorder(Request $request, Board $board): JsonResponse
-    {
-        $taskIds = $request->input('tasksPosition');
-        $statusId = $request->input('status_id');
-
-        foreach ($taskIds as $index => $taskId) {
-            Task::where('id', $taskId)
-                ->where('board_id', $board->id)
-                ->update([
-                    'position' => $index,
-                    'status_id' => $statusId
-                ]);
-        }
-
-        return response()->json(['message' => 'Tarefas reordenadas com sucesso.']);
-    }
-
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Board $board, Task $task): RedirectResponse
-    {
-        $task->delete();
-        return redirect()->route('boards.show', $board)
-            ->with('success', 'Deleted Task: ' . $task->title . ' successfully!');
     }
 }

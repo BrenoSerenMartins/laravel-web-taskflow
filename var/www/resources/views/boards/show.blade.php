@@ -114,10 +114,16 @@
 
                                 </button>
                                 <!-- Botão de Exclusão -->
-                                <button @click.prevent="$refs.deleteForm.submit()"
+                                <button @click.prevent="$refs.deleteForm{{$status->id}}.submit()"
                                         class="text-gray-500 hover:text-red-600 transition">
                                     <span class="material-symbols-outlined text-[20px]">delete_forever</span>
                                 </button>
+                                <!-- Form de exclusão ativado remotamente pelo botão -->
+                                <form x-ref="deleteForm{{$status->id}}" method="POST"
+                                      action="{{ route('boards.statuses.destroy', [$board, $status]) }}" class="hidden">
+                                    @csrf
+                                    @method('DELETE')
+                                </form>
                             </div>
                             <!-- Modal de edição -->
                             <div x-show="open" x-cloak
@@ -155,13 +161,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Form de exclusão ativado remotamente pelo botão -->
-                        <form x-ref="deleteForm" method="POST"
-                              action="{{ route('boards.statuses.destroy', [$board, $status]) }}" class="hidden">
-                            @csrf
-                            @method('DELETE')
-                        </form>
 
                         <!-- Tasks -->
                         <div class="space-y-2" x-ref="tasksContainer-{{ $status->id }}">
