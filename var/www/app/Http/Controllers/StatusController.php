@@ -2,75 +2,41 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Statuses\ReorderStatusRequest;
+use App\Http\Requests\Statuses\StoreStatusRequest;
+use App\Http\Requests\Statuses\UpdateStatusRequest;
 use App\Models\Board;
 use App\Models\Status;
-use Illuminate\Database\Eloquent\Collection;
+use App\Services\StatusService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class StatusController extends Controller
 {
-
-    public function index(): Collection
+    public function __construct(protected StatusService $statusService)
     {
-        return Status::with(['board', 'tasks'])->get();
     }
 
-    public function store(Board $board, Request $request): RedirectResponse
+    public function store(Board $board, StoreStatusRequest $request): RedirectResponse
     {
-        $validatedFields = $request->validate([
-            'name' => 'required|string|max:255',
-            'color' => 'nullable|string|max:25',
-            'order' => 'nullable|integer',
-        ]);
-        removeEmptyOptionalFields(Status::OPTIONAL_FIELDS, $validatedFields);
-        $board->statuses()->create($validatedFields);
+        $this->statusService->create($board, $request->validated());
 
-        return redirect()->route('boards.show', $board)
-            ->with('success', 'Status: ' . $request->input('name') . ' successfully!');
+        return to_route('boards.show', $board)
+            ->with('success', "Status: {$request->input('name')} successfully!");
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Status $status)
+    public function update(UpdateStatusRequest $request, Board $board, Status $status): RedirectResponse
     {
-        //
+        $this->statusService->update($request->validated(), $status);
+
+        return to_route('boards.show', $board)
+            ->with('success', "Updated Status: {$request->input('name')} successfully!");
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Status $status)
+    public function reorder(ReorderStatusRequest $request, Board $board): JsonResponse
     {
-        //
-    }
-
-    public function update(Request $request, Board $board, Status $status): RedirectResponse
-    {
-        $validatedFields = $request->validate([
-            'name' => 'required|string|max:255',
-            'position' => 'nullable|integer'
-        ]);
-        removeEmptyOptionalFields(Status::OPTIONAL_UPDATE_FIELDS, $validatedFields);
-        $status->update($validatedFields);
-
-        return redirect()->route('boards.show', $board)
-            ->with('success', 'Updated Status: ' . $request->input('name') . ' successfully!');
-    }
-
-    public function reorder(Request $request, Board $board): JsonResponse
-    {
-        $statusesPosition = $request->input('statusesPosition');
-
-        foreach ($statusesPosition as $index => $statusId) {
-            $status = $board->statuses()->where('id', $statusId)->first();
-
-            if ($status) {
-                $status->update(['position' => $index]);
-            }
-        }
+        $this->statusService->reorderStatuses($request->validated(), $board);
 
         return response()->json(['success' => true]);
     }
@@ -79,7 +45,8 @@ class StatusController extends Controller
     public function destroy(Board $board, Status $status): RedirectResponse
     {
         $status->delete();
-        return redirect()->route('boards.show', $board)
-            ->with('success', 'Deleted Status: ' . $status->name . ' successfully!');
+
+        return to_route('boards.show', $board)
+            ->with('success', "Deleted Status: {$status->name} successfully!");
     }
 }
