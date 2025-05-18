@@ -165,7 +165,8 @@
                         <!-- Tasks -->
                         <div class="space-y-2" x-ref="tasksContainer-{{ $status->id }}">
                             @foreach($status->tasks->sortBy('position') as $task)
-                                <div x-data="{ open: false, editing: false }" class="relative" data-id="{{ $task->id }}">
+                                <div x-data="{ open: false, editing: false }" class="relative"
+                                     data-id="{{ $task->id }}">
                                     <!-- Trigger -->
                                     <div @click="open = true"
                                          class="cursor-pointer bg-gray-100 rounded p-3 shadow-sm hover:bg-gray-200 transition">

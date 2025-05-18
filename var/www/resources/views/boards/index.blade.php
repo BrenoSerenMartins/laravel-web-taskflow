@@ -9,10 +9,7 @@
         <div x-data="{ showForm: false }" class="relative">
             <button @click="showForm = !showForm"
                     class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                     stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
+                <span class="material-symbols-outlined">add</span>
             </button>
 
             <!-- Add Form -->
@@ -48,12 +45,8 @@
                     {{-- Modal de edição --}}
                     <x-modal title="Edit Board" :open="false">
                         <x-slot:trigger>
-                            <svg class="w-5 h-5 text-gray-500 hover:text-blue-600 cursor-pointer"
-                                 xmlns="http://www.w3.org/2000/svg"
-                                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M11 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 113 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                            </svg>
+                            <span
+                                class="material-symbols-outlined text-gray-600 hover:text-blue-600 cursor-pointer text-[20px]">edit_square</span>
                         </x-slot:trigger>
 
                         <form method="POST" action="{{ route('boards.update', $board) }}">
@@ -78,11 +71,7 @@
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="text-gray-500 hover:text-red-600" title="Delete">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                 viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M6 18L18 6M6 6l12 12"/>
-                            </svg>
+                            <span class="material-symbols-outlined text-[20px]">delete_forever</span>
                         </button>
                     </form>
                 </div>

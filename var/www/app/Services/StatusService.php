@@ -10,6 +10,7 @@ class StatusService
 {
     public function create($board, $statusData): Status
     {
+        $statusData['position'] = $this->getNextPosition($statusData);
         removeEmptyOptionalFields(Status::OPTIONAL_FIELDS, $statusData);
         return $board->statuses()->create($statusData);
     }
@@ -34,5 +35,13 @@ class StatusService
                 }
             }
         });
+    }
+
+    private function getNextPosition($statusData)
+    {
+        if (!empty($statusData['position'])) {
+            return $statusData['position'];
+        }
+        return (int)Status::max('position') + 1;
     }
 }
