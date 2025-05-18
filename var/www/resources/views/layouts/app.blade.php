@@ -1,34 +1,39 @@
-<!--
-declare(strict_types=1)
--->
-
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="description" content="Aplicativo moderno construído com Laravel">
+
     <title>@yield('title', 'Meu App')</title>
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
+    {{-- Tailwind CSS via CDN --}}
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    {{-- Alpine.js --}}
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    {{-- SortableJS CDN --}}
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-
+    {{-- Ícones Google --}}
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
 </head>
-<body class="bg-gray-100 text-gray-800">
+<body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col">
+{{-- Navbar (ajuste o componente se necessário) --}}
+@include('components.navbar')
 
-<div class="min-h-screen">
-    @include('components.navbar')
+<main class="flex-1 container mx-auto px-6 py-8">
+    {{-- Mensagens de sessão --}}
+    @include('components.flash-messages')
 
-    <main class="flex-1 p-6">
-        @if(session('success'))
-            <div class="bg-green-100 text-green-800 p-3 rounded mb-4">
-                {{ session('success') }}
-            </div>
-        @endif
-        @yield('content')
-    </main>
-</div>
+    {{-- Conteúdo dinâmico --}}
+    @yield('content')
+</main>
+
+{{-- Rodapé opcional --}}
+{{-- <footer class="text-center text-sm text-gray-500 py-4">
+    &copy; {{ date('Y') }} Meu App. Todos os direitos reservados.
+</footer> --}}
+
 
 </body>
 </html>
