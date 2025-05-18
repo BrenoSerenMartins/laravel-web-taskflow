@@ -1,9 +1,9 @@
 <?php
+
 namespace App\Services;
 
 use App\Models\Task;
 use App\Models\Board;
-use App\Models\Status;
 use Illuminate\Support\Facades\DB;
 
 class TaskService
@@ -32,12 +32,14 @@ class TaskService
 
         DB::transaction(function () use ($newTasksOrder, $statusId, $board) {
             foreach ($newTasksOrder as $index => $taskId) {
-                Task::where('id', $taskId)
-                    ->where('board_id', $board->id)
-                    ->update([
+                $task = Task::where('id', $taskId)->where('board_id', $board->id)->first();
+
+                if (!empty($task)) {
+                    $task->update([
                         'position' => $index,
                         'status_id' => $statusId
                     ]);
+                }
             }
         });
     }
@@ -49,8 +51,6 @@ class TaskService
         }
         return (int)Task::where('status_id', $taskData['status_id'])->max('position') + 1;
     }
-
-
 
 
 }
